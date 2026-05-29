@@ -18,6 +18,7 @@ const postSchema = new Schema<IPost>(
         category: { type: String, enum: CATEGORIES, default: "Uncategorized" },
         description: { type: String, required: true },
         thumbnail: { type: String, required: true },
+        thumbnailPublicId:  { type: String, required: true },
         creator: { type: Schema.Types.ObjectId, ref: "User", required: true },
     },
     { timestamps: true }

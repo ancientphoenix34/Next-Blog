@@ -1,5 +1,4 @@
 import { Document, Types } from "mongoose";
-import { Interface } from "readline";
 
 // ─── Category ────────────────────────────────────────────────────────────────
 export type Category =
@@ -35,6 +34,7 @@ export interface IPost extends Document {
     category: Category;
     description: string;
     thumbnail: string;
+    thumbnailPublicId: string;
     creator: Types.ObjectId;
     createdAt: Date;
     updatedAt: Date;
