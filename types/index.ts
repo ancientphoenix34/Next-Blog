@@ -59,3 +59,30 @@ export interface ApiErrorResponse {
     message: string;
     code: number;
 }
+
+// ─── The shape stored in context after login ────────────────────────────────
+
+export interface CurrentUser {
+  _id: string;
+  name: string;
+  email: string;
+  avatar?: string;
+  posts: number;
+  token: string;
+}
+
+// ─── Plain object shape after JSON serialization — used in frontend components
+export interface PostData {
+  _id: string;
+  title: string;
+  category: Category;
+  description: string;
+  thumbnail: string;
+  thumbnailPublicId: string;
+  creator: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+
+

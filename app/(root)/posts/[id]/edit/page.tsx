@@ -1,0 +1,154 @@
+"use client";
+
+import { useState, useEffect, FormEvent } from "react";
+import { useRouter, useParams } from "next/navigation";
+import { useUser } from "@/context/UserContext";
+import RichTextEditor from "@/components/shared/RichTextEditor";
+import { Category, PostData } from "@/types";
+
+const CATEGORIES: Category[] = [
+  "Agriculture", "Business", "Education", "Entertainment",
+  "Art", "Investment", "Weather", "Uncategorized",
+];
+
+export default function EditPostPage() {
+  const router        = useRouter();
+  const { id }        = useParams<{ id: string }>();
+  const { currentUser } = useUser();
+
+  const [title, setTitle]           = useState("");
+  const [category, setCategory]     = useState<Category>("Uncategorized");
+  const [description, setDescription] = useState("");
+  const [thumbnail, setThumbnail]   = useState<File | null>(null);
+  const [preview, setPreview]       = useState("");
+  const [error, setError]           = useState("");
+  const [loading, setLoading]       = useState(false);
+
+  // Redirect if not logged in
+  if (!currentUser) {
+    router.push("/login");
+    return null;
+  }
+
+  // Load existing post data
+  useEffect(() => {
+    const fetchPost = async () => {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/posts/${id}`);
+      if (!res.ok) { router.push("/"); return; }
+      const post: PostData = await res.json();
+
+      // Redirect if not the owner
+      if (post.creator !== currentUser._id) {
+        router.push("/");
+        return;
+      }
+
+      setTitle(post.title);
+      setCategory(post.category);
+      setDescription(post.description);
+      setPreview(post.thumbnail);
+    };
+
+    fetchPost();
+  }, [id]);
+
+  const handleThumbnail = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setThumbnail(file);
+    setPreview(URL.createObjectURL(file));
+  };
+
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setError("");
+    setLoading(true);
+
+    const form = new FormData();
+    form.append("title", title);
+    form.append("category", category);
+    form.append("description", description);
+    if (thumbnail) form.append("thumbnail", thumbnail);
+
+    const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/posts/${id}`, {
+      method: "PATCH",
+      headers: { Authorization: `Bearer ${currentUser.token}` },
+      body: form,
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      setError(data.message || "Failed to update post");
+      setLoading(false);
+      return;
+    }
+
+    router.push(`/posts/${id}`);
+  };
+
+  return (
+    <section className="max-w-3xl mx-auto px-4 py-10">
+      <h1 className="text-3xl font-bold text-gray-900 mb-8">Edit Post</h1>
+
+      <form onSubmit={handleSubmit} className="space-y-6">
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">Title</label>
+          <input
+            type="text"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            required
+            className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">Category</label>
+          <select
+            value={category}
+            onChange={(e) => setCategory(e.target.value as Category)}
+            className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+          >
+            {CATEGORIES.map((c) => (
+              <option key={c} value={c}>{c}</option>
+            ))}
+          </select>
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">Thumbnail</label>
+          {preview && (
+            <img src={preview} alt="Preview" className="mb-2 w-full h-48 object-cover rounded-lg" />
+          )}
+          <input
+            type="file"
+            accept="image/*"
+            onChange={handleThumbnail}
+            className="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+          />
+          <p className="mt-1 text-xs text-gray-400">Leave empty to keep current thumbnail</p>
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
+          <RichTextEditor value={description} onChange={setDescription} />
+        </div>
+
+        {error && (
+          <p className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg px-3 py-2">
+            {error}
+          </p>
+        )}
+
+        <button
+          type="submit"
+          disabled={loading}
+          className="w-full bg-blue-600 text-white py-2 rounded-lg text-sm font-medium hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          {loading ? "Saving..." : "Save Changes"}
+        </button>
+      </form>
+    </section>
+  );
+}
