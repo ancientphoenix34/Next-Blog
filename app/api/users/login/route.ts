@@ -42,10 +42,11 @@ export async function POST(req: NextRequest) {
         const response = NextResponse.json({
             accessToken,
             user: {
-                id: user._id,
+                _id: user._id.toString(),
                 name: user.name,
                 email: user.email,
                 avatar: user.avatar,
+                posts: user.posts,
             },
         });
 

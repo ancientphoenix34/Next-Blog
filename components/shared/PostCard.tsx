@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { IPost } from "@/types";
+import Image from "next/image";
 import { PostData } from "@/types";
 
 interface PostCardProps {
@@ -11,11 +11,15 @@ export default function PostCard({ post }: PostCardProps) {
   return (
     <div className="bg-white rounded-xl border border-gray-200 overflow-hidden hover:shadow-md transition-shadow">
       <Link href={`/posts/${post._id}`}>
-        <img
-          src={post.thumbnail}
-          alt={post.title}
-          className="w-full h-48 object-cover"
-        />
+        <div className="relative w-full h-48">
+          <Image
+            src={post.thumbnail}
+            alt={post.title}
+            fill
+            className="object-cover"
+            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+          />
+        </div>
       </Link>
       <div className="p-4">
         <span className="text-xs font-medium text-blue-600 uppercase tracking-wide">
@@ -27,7 +31,15 @@ export default function PostCard({ post }: PostCardProps) {
           </h2>
         </Link>
         <p className="mt-2 text-sm text-gray-500 line-clamp-3">
-          {post.description.replace(/<[^>]*>/g, "")}
+          {post.description
+            .replace(/<[^>]*>/g, " ")
+            .replace(/&nbsp;/g, " ")
+            .replace(/&amp;/g, "&")
+            .replace(/&lt;/g, "<")
+            .replace(/&gt;/g, ">")
+            .replace(/&quot;/g, '"')
+            .replace(/\s+/g, " ")
+            .trim()}
         </p>
         <div className="mt-3 text-xs text-gray-400">
           {new Date(post.updatedAt).toLocaleDateString("en-US", {

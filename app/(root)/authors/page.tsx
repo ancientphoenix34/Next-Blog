@@ -1,4 +1,10 @@
 import Link from "next/link";
+import Image from "next/image";
+
+export const metadata = {
+  title: "Authors | MyBlog",
+  description: "Browse all authors on MyBlog",
+};
 
 interface Author {
   _id: string;
@@ -33,10 +39,12 @@ export default async function AuthorsPage() {
               href={`/authors/${author._id}`}
               className="flex items-center gap-4 bg-white border border-gray-200 rounded-xl p-5 hover:shadow-md transition-shadow"
             >
-              <img
-                src={author.avatar || "/avatar-placeholder.png"}
+              <Image
+                src={author.avatar || "/avatar-placeholder.svg"}
                 alt={author.name}
-                className="w-14 h-14 rounded-full object-cover flex-shrink-0"
+                width={56}
+                height={56}
+                className="rounded-full object-cover flex-shrink-0"
               />
               <div>
                 <h2 className="font-semibold text-gray-900">{author.name}</h2>

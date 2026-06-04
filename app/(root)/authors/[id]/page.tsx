@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { notFound } from "next/navigation";
 import PostCard from "@/components/shared/PostCard";
 import { PostData } from "@/types";
@@ -43,10 +44,12 @@ export default async function AuthorPage({ params }: Params) {
     <section className="max-w-6xl mx-auto px-4 py-10">
       {/* Author profile card */}
       <div className="flex items-center gap-6 mb-10 p-6 bg-white border border-gray-200 rounded-2xl">
-        <img
-          src={author.avatar || "/avatar-placeholder.png"}
+        <Image
+          src={author.avatar || "/avatar-placeholder.svg"}
           alt={author.name}
-          className="w-24 h-24 rounded-full object-cover"
+          width={96}
+          height={96}
+          className="rounded-full object-cover"
         />
         <div>
           <h1 className="text-2xl font-bold text-gray-900">{author.name}</h1>

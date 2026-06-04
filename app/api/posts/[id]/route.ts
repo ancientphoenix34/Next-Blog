@@ -16,10 +16,14 @@ export async function GET(_req: NextRequest, { params }: Params) {
     const { id } = await params;
     await connectDB();
 
-    const post = await Post.findById(id);
+    const post = await Post.findById(id).lean();
     if (!post) throw new HttpError("Post not found", 404);
 
-    return NextResponse.json(post);
+    return NextResponse.json({
+      ...post,
+      _id: post._id.toString(),
+      creator: post.creator.toString(),
+    });
   } catch (err) {
     return handleError(err);
   }

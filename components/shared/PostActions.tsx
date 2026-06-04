@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useUser } from "@/context/UserContext";
+import { fetchWithAuth } from "@/lib/utils/fetchWithAuth";
 
 interface Props {
   postId: string;
@@ -10,7 +11,7 @@ interface Props {
 }
 
 export default function PostActions({ postId, creatorId }: Props) {
-  const { currentUser } = useUser();
+  const { currentUser, setCurrentUser } = useUser();
   const router = useRouter();
 
   if (!currentUser || currentUser._id !== creatorId) return null;
@@ -18,10 +19,12 @@ export default function PostActions({ postId, creatorId }: Props) {
   const handleDelete = async () => {
     if (!confirm("Delete this post?")) return;
 
-    await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/posts/${postId}`, {
-      method: "DELETE",
-      headers: { Authorization: `Bearer ${currentUser.token}` },
-    });
+    await fetchWithAuth(
+      `${process.env.NEXT_PUBLIC_BASE_URL}/api/posts/${postId}`,
+      { method: "DELETE" },
+      currentUser,
+      setCurrentUser
+    );
 
     router.push("/");
   };
